@@ -360,4 +360,17 @@ MigrationBackup/
 .ionide/
 
 # Fody - auto-generated XML schema
+
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
+Data/*.db
+
+# Sensitive configuration files - DO NOT COMMIT
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Staging.json
+appsettings.*.json
+!appsettings.json
 FodyWeavers.xsd
