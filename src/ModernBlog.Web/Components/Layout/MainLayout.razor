@@ -1,0 +1,139 @@
+﻿@inherits LayoutComponentBase
+@implements IDisposable
+
+@inject NavigationManager NavigationManager
+
+<div class="site-shell">
+    <header class="site-header">
+        <div class="site-header__inner">
+            <a class="site-brand" href="/">
+                <span class="site-brand__mark">JM</span>
+
+                <span class="site-brand__text">
+                    <strong>Justin Marshall</strong>
+                    <small>Software Developer</small>
+                </span>
+            </a>
+
+            <nav class="site-nav">
+                <NavLink href="/posts"
+                         Match="NavLinkMatch.All">
+                    Posts
+                </NavLink>
+
+                <NavLink href="/about">
+                    About
+                </NavLink>
+
+                <AuthorizeView>
+                    <Authorized>
+                        <NavLink href="/posts/drafts"
+                                 Match="NavLinkMatch.All">
+                            Drafts
+                        </NavLink>
+                    </Authorized>
+                </AuthorizeView>
+            </nav>
+
+            <div class="site-actions">
+                <AuthorizeView>
+                    <Authorized Context="authContext">
+                        <a class="button button--primary"
+                           href="/posts/new">
+                            New post
+                        </a>
+
+                        <div class="account-menu">
+                            <a class="account-link"
+                               href="/Account/Manage">
+                                <span class="account-avatar">
+                                    @GetInitial(authContext.User.Identity?.Name)
+                                </span>
+
+                                <span class="account-name">
+                                    @authContext.User.Identity?.Name
+                                </span>
+                            </a>
+
+                            <form action="/Account/Logout" method="post">
+                                <AntiforgeryToken />
+
+                                <input type="hidden"
+                                       name="ReturnUrl"
+                                       value="" />
+
+                                <button type="submit"
+                                        class="button button--ghost">
+                                    Log out
+                                </button>
+                            </form>
+                        </div>
+                    </Authorized>
+
+                    <NotAuthorized>
+                        <a class="button button--ghost"
+                           href="/Account/Register">
+                            Register
+                        </a>
+
+                        <a class="button button--primary"
+                           href="/Account/Login">
+                            Log in
+                        </a>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </div>
+    </header>
+
+    <main class="site-main">
+        @Body
+    </main>
+
+    <footer class="site-footer">
+        <div class="site-footer__inner">
+            <span>© @DateTime.UtcNow.Year Justin Marshall</span>
+            <span>Built with ASP.NET Core and Blazor</span>
+        </div>
+    </footer>
+</div>
+
+@code {
+    private string currentUrl = "/";
+
+    protected override void OnInitialized()
+    {
+        UpdateCurrentUrl();
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(
+        object? sender,
+        LocationChangedEventArgs args)
+    {
+        UpdateCurrentUrl();
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private void UpdateCurrentUrl()
+    {
+        var relativeUrl = NavigationManager.ToBaseRelativePath(
+            NavigationManager.Uri);
+
+        currentUrl = string.IsNullOrWhiteSpace(relativeUrl)
+            ? "/"
+            : $"/{relativeUrl}";
+    }
+
+    private static string GetInitial(string? username)
+    {
+        return string.IsNullOrWhiteSpace(username)
+            ? "?"
+            : username[..1].ToUpperInvariant();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}

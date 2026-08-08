@@ -1,0 +1,56 @@
+﻿@page "/posts/{slug}"
+@using Microsoft.EntityFrameworkCore
+@using ModernBlog.Domain.Posts
+@using ModernBlog.Infrastructure.Markdown
+@using ModernBlog.Web.Components.Dtos
+@inject ModernBlog.Infrastructure.Persistence.BlogDbContext Db
+@inject ModernBlog.Web.Data.ApplicationDbContext userDb
+@inject NavigationManager Navigation
+@inject IMarkdownRenderer MarkdownRenderer
+
+@code {
+    [Parameter] public string slug { get; set; } = string.Empty;
+    private PostDto? postToShow;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (string.IsNullOrWhiteSpace(slug))
+        {
+            Navigation.NavigateTo("/not-found");
+            return;
+        }
+
+        var dbPost = await Db.Posts.FirstOrDefaultAsync(p => p.Slug == slug);
+        if (dbPost is null)
+        {
+            Navigation.NavigateTo("/not-found");
+        }
+
+        postToShow = new PostDto
+        {
+            Title = dbPost.Title,
+            Slug = dbPost.Slug,
+            Markdown = dbPost.Markdown,
+            Excerpt = dbPost.Excerpt,
+            SeoTitle = dbPost.SeoTitle,
+            SeoDescription = dbPost.SeoDescription,
+            Author = userDb.Users.FirstOrDefault(r => r.Id == dbPost.AuthorId)?.UserName ?? "Unknown",
+            PublishAtUtc = dbPost.PublishedAtUtc?.ToString("u") ?? dbPost.CreatedAtUtc.ToString("u")
+        };
+    }
+}
+
+@if (postToShow is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <article>
+        <h1>@postToShow.Title</h1>
+        <p><small>By @postToShow.Author — @postToShow.PublishAtUtc</small></p>
+        <article class="post-content">
+            @((MarkupString)MarkdownRenderer.Render(@postToShow.Markdown))
+        </article>
+    </article>
+}

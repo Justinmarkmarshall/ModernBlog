@@ -1,0 +1,42 @@
+﻿.site-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.account-menu {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.account-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.account-menu form {
+    margin: 0;
+    display: flex;
+}
+
+.account-name {
+    max-width: 14rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+    .account-name {
+        display: none;
+    }
+
+    .site-header__inner {
+        gap: 1rem;
+    }
+}

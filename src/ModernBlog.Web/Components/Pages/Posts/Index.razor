@@ -1,0 +1,119 @@
+﻿@page "/posts"
+@using Microsoft.EntityFrameworkCore
+@using ModernBlog.Domain.Posts
+@using ModernBlog.Web.Components.Dtos
+@inject ModernBlog.Infrastructure.Persistence.BlogDbContext Db
+@inject ModernBlog.Web.Data.ApplicationDbContext userDb
+@inject NavigationManager Navigation
+
+<PageTitle>Posts</PageTitle>
+
+<section class="hero">
+    <p class="eyebrow">ModernBlog</p>
+
+    <h1>Latest writing</h1>
+
+    <p class="hero__description">
+        Thoughts on software development, .NET, cloud architecture
+        and the craft of building reliable systems.
+    </p>
+</section>
+
+@if (postDtos.Count == 0)
+{
+    <div class="empty-state">
+        <h2>No posts yet</h2>
+        <p>Your published articles will appear here.</p>
+
+        <AuthorizeView>
+            <Authorized>
+                <a class="button button--primary" href="/posts/new">
+                    Write the first post
+                </a>
+            </Authorized>
+        </AuthorizeView>
+    </div>
+}
+else
+{
+    <section class="post-list">
+        @foreach (var post in postDtos)
+        {
+            <article class="post-card">
+                <div class="post-card__content">
+                    <p class="post-card__category">
+                        Software development
+                    </p>
+
+                    <h2>
+                        <a href="/posts/@post.Slug">
+                            @post.Title
+                        </a>
+                    </h2>
+
+                    @if (!string.IsNullOrWhiteSpace(post.Excerpt))
+                    {
+                        <p class="post-card__excerpt">
+                            @post.Excerpt
+                        </p>
+                    }
+
+                    <div class="post-meta">
+                        <span>@post.Author</span>
+                        <span aria-hidden="true">·</span>
+                        <time datetime="@post.PublishAtUtc">
+                            @post.PublishAtUtc?
+                        </time>
+                    </div>
+
+                    <a class="post-card__link"
+                       href="/posts/@post.Slug">
+                        Read article
+                        <span aria-hidden="true">→</span>
+                    </a>
+                </div>
+            </article>
+        }
+    </section>
+}
+
+@code {
+    private List<PostDto>? postDtos = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var ids = await Db.Posts
+            .Select(p => new { p.Id, Key = p.PublishedAtUtc ?? p.CreatedAtUtc })
+            .ToListAsync();
+
+        var orderedIds = ids.OrderByDescending(x => x.Key).Select(x => x.Id).ToList();
+
+        var posts = await Db.Posts
+            .Where(p => orderedIds.Contains(p.Id))
+            // optional: .OrderBy(...) to match orderedIds if needed
+            .ToListAsync();
+
+        foreach (var dbPost in posts)
+        {
+            postDtos.Add(new PostDto
+            {
+                Title = dbPost.Title,
+                Slug = dbPost.Slug,
+                Markdown = dbPost.Markdown,
+                Excerpt = dbPost.Excerpt,
+                SeoTitle = dbPost.SeoTitle,
+                SeoDescription = dbPost.SeoDescription,
+                Author = userDb.Users.FirstOrDefault(r => r.Id == dbPost.AuthorId)?.NormalizedUserName ?? "Unknown", 
+                PublishAtUtc = dbPost.PublishedAtUtc?.ToString("d MMMM yyyy") ?? dbPost.CreatedAtUtc.ToString("d MMMM yyyy")
+            });
+        }
+    }
+
+    private string GetExcerpt(PostDto p)
+    {
+        if (!string.IsNullOrWhiteSpace(p.Excerpt)) return p.Excerpt!;
+        var text = p.Markdown ?? string.Empty;
+        var snippet = text.Length <= 240 ? text : text[..240] + "…";
+        return snippet;
+    }
+}

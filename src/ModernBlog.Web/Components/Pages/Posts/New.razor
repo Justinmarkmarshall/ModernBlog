@@ -1,0 +1,155 @@
+@page "/posts/new"
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+@using System.ComponentModel.DataAnnotations
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using ModernBlog.Domain.Posts
+@inject ModernBlog.Infrastructure.Persistence.BlogDbContext Db
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
+<h3>New Post</h3>
+
+@using Microsoft.AspNetCore.Components.Forms
+<section class="editor-header">
+    <div>
+        <p class="eyebrow">Administration</p>
+        <h1>Create a new post</h1>
+        <p>Write, review and publish a new article.</p>
+    </div>
+</section>
+
+<div class="editor-card">
+    <EditForm EditContext="editContext" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+
+        <div class="form-field">
+            <label for="title">Title</label>
+            <InputText id="title"
+                       class="form-control"
+                       @bind-Value="model.Title" />
+            <ValidationMessage For="() => model.Title" />
+        </div>
+
+        <div class="form-field">
+            <label for="slug">Slug</label>
+            <InputText id="slug"
+                       class="form-control"
+                       @bind-Value="model.Slug" />
+            <span class="field-hint">
+                /posts/@model.Slug
+            </span>
+            <ValidationMessage For="() => model.Slug" />
+        </div>
+
+        <div class="form-field">
+            <label for="markdown">Content</label>
+            <InputTextArea id="markdown"
+                           class="form-control markdown-editor"
+                           @bind-Value="model.Markdown" />
+            <ValidationMessage For="() => model.Markdown" />
+        </div>
+
+        <div class="editor-actions">
+            <label class="publish-option">
+                <InputCheckbox @bind-Value="model.Publish" />
+                Publish immediately
+            </label>
+
+            <div>
+                <button type="button"
+                        class="button button--ghost"
+                        @onclick='() => Navigation.NavigateTo("/")'>
+                    Cancel
+                </button>
+
+                <button type="submit"
+                        class="button button--primary">
+                    Save post
+                </button>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    private NewPostModel model = new();
+    private EditContext? editContext;
+    private bool isAuthenticated;
+    private string lastMessage = "(none)";
+    private int clickCount;
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(model);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+        isAuthenticated = auth.User?.Identity?.IsAuthenticated ?? false;
+    }
+
+    private sealed class NewPostModel
+    {
+        [Required]
+        public string Title { get; set; } = string.Empty;
+
+        [Required]
+        public string Slug { get; set; } = string.Empty;
+
+        [Required]
+        public string Markdown { get; set; } = string.Empty;
+
+        public string? Excerpt { get; set; }
+
+        public string? SeoTitle { get; set; }
+
+        public string? SeoDescription { get; set; }
+
+        public bool Publish { get; set; }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = auth.User;
+        if (user?.Identity is null || !user.Identity.IsAuthenticated)
+        {
+            Navigation.NavigateTo($"Account/Login?returnUrl={Uri.EscapeDataString(Navigation.Uri)}", forceLoad: true);
+            return;
+        }
+
+        var authorId = user.FindFirstValue(ClaimTypes.NameIdentifier) ?? user.Identity.Name ?? string.Empty;
+
+        var post = new Post(model.Title, model.Slug, model.Markdown, authorId);
+        post.Update(model.Title, model.Slug, model.Markdown, model.Excerpt, model.SeoTitle, model.SeoDescription);
+        if (model.Publish)
+        {
+            post.Publish();
+        }
+
+        Db.Posts.Add(post);
+        await Db.SaveChangesAsync();
+
+        // Redirect to the post's slug URL or home if a reader page isn't implemented yet
+        Navigation.NavigateTo($"/posts/{post.Slug}");
+    }
+
+    private async Task OnSave()
+    {
+        if (editContext is null) return;
+
+        if (editContext.Validate())
+        {
+            await HandleValidSubmit();
+        }
+    }
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/");
+    }
+}
