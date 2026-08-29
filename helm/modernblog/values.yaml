@@ -98,12 +98,13 @@ httpRoute:
   annotations: {}
   # Which Gateways this Route is attached to.
   parentRefs:
-  - name: gateway
+  - name: public-gateway
+    namespace: envoy-gateway-system
     sectionName: http
     # namespace: default
   # Hostnames matching HTTP header.
   hostnames:
-  - chart-example.local
+    - blog.marshalllab.uk
   # List of rules and filters applied.
   rules:
   - matches:
