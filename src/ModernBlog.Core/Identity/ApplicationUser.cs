@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace ModernBlog.Infrastructure.Identity
+namespace ModernBlog.Core.Identity
 {
     public sealed class ApplicationUser : IdentityUser
     {

@@ -1,9 +1,8 @@
-using Markdig.Renderers;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using ModernBlog.Infrastructure.Markdown;
-using ModernBlog.Infrastructure.Persistence;
+using ModernBlog.Core.Markdown;
+using ModernBlog.Core.Persistence;
 using ModernBlog.Web.Components;
 using ModernBlog.Web.Components.Account;
 using ModernBlog.Web.Data;
@@ -17,8 +16,8 @@ builder.Services.AddRazorComponents()
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
-builder.Services.AddSingleton<ModernBlog.Infrastructure.Markdown.IMarkdownRenderer, MarkdownRenderer>();
-
+builder.Services.AddSingleton<ModernBlog.Core.Markdown.IMarkdownRenderer, MarkdownRenderer>();
+builder.Services.AddHealthChecks();
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultScheme = IdentityConstants.ApplicationScheme;
@@ -32,7 +31,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Register the blog persistence context so pages/components can save posts
 // Specify the migrations assembly so Database.Migrate() finds BlogDbContext migrations
 builder.Services.AddDbContext<BlogDbContext>(options =>
-    options.UseSqlite(connectionString, b => b.MigrationsAssembly("ModernBlog.Infrastructure")));
+    options.UseSqlite(connectionString, b => b.MigrationsAssembly("ModernBlog.Core")));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -62,7 +61,7 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
     // Apply any pending migrations for the blog context as well.
-    var blogDb = scope.ServiceProvider.GetRequiredService<BlogDbContext>();
+    var blogDb = scope.ServiceProvider.GetRequiredService<ModernBlog.Core.Persistence.BlogDbContext>();
     blogDb.Database.Migrate();
 }
 
@@ -88,5 +87,6 @@ app.MapRazorComponents<App>()
 
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
-
+app.MapHealthChecks("/health");
+    
 app.Run();

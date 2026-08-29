@@ -1,6 +1,6 @@
 ﻿using Markdig;
 
-namespace ModernBlog.Infrastructure.Markdown;
+namespace ModernBlog.Core.Markdown;
 
 public interface IMarkdownRenderer
 {

@@ -3,8 +3,8 @@
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
-@using ModernBlog.Infrastructure.Markdown
-@using ModernBlog.Infrastructure.Persistence
+@using ModernBlog.Core.Markdown
+@using ModernBlog.Core.Persistence
 @using ModernBlog.Web.Components.Dtos
 @inject BlogDbContext Db
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -41,12 +41,6 @@ else
 
 
     <div class="post-editor-page">
-
-        <button type="button"
-                class="btn btn-warning mb-3"
-                @onclick="TestInteractive">
-            Test Blazor
-        </button>
 
         <span class="ms-2">@testMessage</span>
 

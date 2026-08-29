@@ -1,10 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ModernBlog.Domain.Posts;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using ModernBlog.Core.Posts;
 
-namespace ModernBlog.Infrastructure.Persistence
+namespace ModernBlog.Core.Persistence
 {
     public sealed class BlogDbContext(
     DbContextOptions<BlogDbContext> options)

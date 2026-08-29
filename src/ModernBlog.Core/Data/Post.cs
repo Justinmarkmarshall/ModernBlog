@@ -1,4 +1,4 @@
-﻿namespace ModernBlog.Domain.Posts;
+﻿namespace ModernBlog.Core.Posts;
 
 public sealed class Post
 {
