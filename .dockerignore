@@ -1,0 +1,74 @@
+# Build artifacts
+**/bin/
+**/obj/
+**/out/
+
+# Visual Studio files
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
+
+# Git files
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+LICENSE
+
+# Test projects
+**/tests/
+**/*Tests/
+**/TestResults/
+
+# CI/CD
+.github/
+azure-pipelines.yml
+
+# Docker files (to avoid recursive copies)
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# IDE and Editor files
+*.swp
+*~
+.DS_Store
+*.bak
+*.tmp
+
+# Logs
+*.log
+logs/
+
+# Package files
+*.nupkg
+*.snupkg
+packages/
+
+# Node modules (if any)
+node_modules/
+npm-debug.log
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Sensitive files
+appsettings.Development.json
+appsettings.*.json
+!appsettings.json
+secrets.json
+
+# Migration backup
+MigrationBackup/

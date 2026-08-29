@@ -1,8 +1,7 @@
 ﻿@page "/posts"
 @using Microsoft.EntityFrameworkCore
-@using ModernBlog.Domain.Posts
 @using ModernBlog.Web.Components.Dtos
-@inject ModernBlog.Infrastructure.Persistence.BlogDbContext Db
+@inject ModernBlog.Core.Persistence.BlogDbContext Db
 @inject ModernBlog.Web.Data.ApplicationDbContext userDb
 @inject NavigationManager Navigation
 

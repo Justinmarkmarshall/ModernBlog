@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using ModernBlog.Infrastructure.Persistence;
+using ModernBlog.Core.Persistence;
 
 #nullable disable
 
-namespace ModernBlog.Infrastructure.Data.Migrations
+namespace ModernBlog.Core.Data.Migrations
 {
     [DbContext(typeof(BlogDbContext))]
     [Migration("20260801113048_CreateBlogSchema")]

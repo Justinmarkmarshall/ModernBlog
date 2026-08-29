@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace ModernBlog.Infrastructure.Data.Migrations
+namespace ModernBlog.Core.Data.Migrations
 {
     /// <inheritdoc />
     public partial class CreateBlogSchema : Migration

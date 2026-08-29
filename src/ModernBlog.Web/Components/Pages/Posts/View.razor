@@ -1,9 +1,9 @@
 ﻿@page "/posts/{slug}"
 @using Microsoft.EntityFrameworkCore
-@using ModernBlog.Domain.Posts
-@using ModernBlog.Infrastructure.Markdown
+@using ModernBlog.Core.Posts
+@using ModernBlog.Core.Markdown
 @using ModernBlog.Web.Components.Dtos
-@inject ModernBlog.Infrastructure.Persistence.BlogDbContext Db
+@inject ModernBlog.Core.Persistence.BlogDbContext Db
 @inject ModernBlog.Web.Data.ApplicationDbContext userDb
 @inject NavigationManager Navigation
 @inject IMarkdownRenderer MarkdownRenderer
