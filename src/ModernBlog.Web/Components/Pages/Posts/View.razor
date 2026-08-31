@@ -1,16 +1,22 @@
 ﻿@page "/posts/{slug}"
+@rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @using ModernBlog.Core.Posts
 @using ModernBlog.Core.Markdown
 @using ModernBlog.Web.Components.Dtos
+@using System.Security.Claims
 @inject ModernBlog.Core.Persistence.BlogDbContext Db
 @inject ModernBlog.Web.Data.ApplicationDbContext userDb
 @inject NavigationManager Navigation
 @inject IMarkdownRenderer MarkdownRenderer
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 @code {
     [Parameter] public string slug { get; set; } = string.Empty;
     private PostDto? postToShow;
+    private Guid postId;
+    private string? authorId;
+    private bool canDelete = false;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -24,7 +30,16 @@
         if (dbPost is null)
         {
             Navigation.NavigateTo("/not-found");
+            return;
         }
+
+        postId = dbPost.Id;
+        authorId = dbPost.AuthorId;
+
+        var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = auth.User;
+        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        canDelete = user.Identity?.IsAuthenticated == true && userId == authorId;
 
         postToShow = new PostDto
         {
@@ -38,6 +53,20 @@
             PublishAtUtc = dbPost.PublishedAtUtc?.ToString("u") ?? dbPost.CreatedAtUtc.ToString("u")
         };
     }
+
+    private async Task DeletePost()
+    {
+        if (!canDelete) return;
+
+        // Confirmation is handled by browser's confirm dialog via JavaScript
+        var post = await Db.Posts.FindAsync(postId);
+        if (post is null) return;
+
+        Db.Posts.Remove(post);
+        await Db.SaveChangesAsync();
+
+        Navigation.NavigateTo("/posts", forceLoad: true);
+    }
 }
 
 @if (postToShow is null)
@@ -47,8 +76,19 @@
 else
 {
     <article>
-        <h1>@postToShow.Title</h1>
-        <p><small>By @postToShow.Author — @postToShow.PublishAtUtc</small></p>
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+            <div>
+                <h1>@postToShow.Title</h1>
+                <p><small>By @postToShow.Author — @postToShow.PublishAtUtc</small></p>
+            </div>
+            @if (canDelete)
+            {
+                <div style="display: flex; gap: 0.5rem;">
+                    <a href="/posts/@postToShow.Slug/edit" class="btn btn-sm btn-outline-primary">Edit</a>
+                    <button type="button" class="btn btn-sm btn-outline-danger" @onclick="DeletePost" @onclick:stopPropagation="true">Delete</button>
+                </div>
+            }
+        </div>
         <article class="markdown-preview">
             @((MarkupString)MarkdownRenderer.Render(@postToShow.Markdown))
         </article>

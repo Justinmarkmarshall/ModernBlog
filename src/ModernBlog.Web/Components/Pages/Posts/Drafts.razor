@@ -1,4 +1,5 @@
 @page "/posts/drafts"
+@rendermode InteractiveServer
 @using System.Security.Claims
 @using Microsoft.EntityFrameworkCore
 @using ModernBlog.Core.Posts
@@ -35,6 +36,7 @@ else
                 <div>
                     <a class="btn btn-sm btn-outline-primary" href="@($"/posts/{p.Slug}/edit")">Edit</a>
                     <a class="btn btn-sm btn-outline-secondary ms-2" href="@($"/posts/{p.Slug}")">Preview</a>
+                    <button type="button" class="btn btn-sm btn-outline-danger ms-2" @onclick="() => DeleteDraft(p.Slug)">Delete</button>
                 </div>
             </li>
         }
@@ -48,6 +50,14 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadDrafts();
+    }
+
+    private async Task LoadDrafts()
+    {
+        loading = true;
+        drafts = new();
+
         var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = auth.User;
         isAuthenticated = user?.Identity?.IsAuthenticated == true;
@@ -86,5 +96,16 @@ else
         }
 
         loading = false;
+    }
+
+    private async Task DeleteDraft(string slug)
+    {
+        var post = await Db.Posts.FirstOrDefaultAsync(p => p.Slug == slug);
+        if (post is null) return;
+
+        Db.Posts.Remove(post);
+        await Db.SaveChangesAsync();
+
+        await LoadDrafts();
     }
 }
