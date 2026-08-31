@@ -49,7 +49,7 @@ else
     <article>
         <h1>@postToShow.Title</h1>
         <p><small>By @postToShow.Author — @postToShow.PublishAtUtc</small></p>
-        <article class="post-content">
+        <article class="markdown-preview">
             @((MarkupString)MarkdownRenderer.Render(@postToShow.Markdown))
         </article>
     </article>
