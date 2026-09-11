@@ -50,7 +50,7 @@
             SeoTitle = dbPost.SeoTitle,
             SeoDescription = dbPost.SeoDescription,
             Author = userDb.Users.FirstOrDefault(r => r.Id == dbPost.AuthorId)?.UserName ?? "Unknown",
-            PublishAtUtc = dbPost.PublishedAtUtc?.ToString("u") ?? dbPost.CreatedAtUtc.ToString("u")
+            PublishAtUtc = dbPost.PublishedAtUtc?.ToString("d MMMM yyyy") ?? dbPost.CreatedAtUtc.ToString("d MMMM yyyy")
         };
     }
 
@@ -79,7 +79,7 @@ else
         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
             <div>
                 <h1>@postToShow.Title</h1>
-                <p><small>By @postToShow.Author — @postToShow.PublishAtUtc</small></p>
+                <p><small>By <!--email_off-->@postToShow.Author<!--/email_off--> — @postToShow.PublishAtUtc</small></p>
             </div>
             @if (canDelete)
             {

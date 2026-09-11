@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch ModernBlog.Web",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/ModernBlog.Web/bin/Debug/net10.0/ModernBlog.Web.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/ModernBlog.Web",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openUrl",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  ]
+}
