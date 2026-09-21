@@ -47,9 +47,11 @@
 
         <div class="form-field">
             <label for="markdown">Content</label>
-            <InputTextArea id="markdown"
-                           class="form-control markdown-editor"
-                           @bind-Value="model.Markdown" />
+            <textarea id="markdown"
+                      class="form-control markdown-editor"
+                      @bind="model.Markdown"
+                      @bind:event="oninput"
+                      rows="12"></textarea>
             <ValidationMessage For="() => model.Markdown" />
         </div>
 
@@ -86,6 +88,8 @@
     {
         editContext = new EditContext(model);
     }
+
+    // markdown input is bound with @bind:event="oninput", explicit handler not required
 
     protected override async Task OnInitializedAsync()
     {

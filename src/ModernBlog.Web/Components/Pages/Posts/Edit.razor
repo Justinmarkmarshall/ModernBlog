@@ -71,11 +71,11 @@ else
                         Markdown
                     </label>
 
-                    <InputTextArea id="markdown"
-                                   class="form-control markdown-editor"
-                                   @bind-Value="editModel.Markdown"
-                                   @oninput="OnMarkdownInput"
-                                   rows="24" />
+                    <textarea id="markdown"
+                              class="form-control markdown-editor"
+                              @bind="editModel.Markdown"
+                              @bind:event="oninput"
+                              rows="24"></textarea>
                 </div>
 
                 <div class="markdown-pane">
@@ -170,15 +170,7 @@ else
         testMessage = $"Interactive at {DateTime.Now:T}";
     }
 
-    private void OnMarkdownInput(ChangeEventArgs e)
-    {
-        if (editModel is null)
-        {
-            return;
-        }
-
-        editModel.Markdown = e.Value?.ToString() ?? string.Empty;
-    }
+    // markdown input is bound with @bind:event="oninput", explicit handler not required
 
     private async Task SaveAsync()
     {
