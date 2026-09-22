@@ -135,6 +135,10 @@
                 "Account/LoginWith2fa",
                 new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
         }
+        else if (result.IsNotAllowed)
+        {
+            errorMessage = "Error: Your account has not been approved by the administrator.";
+        }
         else if (result.IsLockedOut)
         {
             Logger.LogWarning("User account locked out.");

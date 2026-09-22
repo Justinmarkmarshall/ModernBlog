@@ -16,6 +16,11 @@
             </a>
 
             <nav class="site-nav">
+                <AuthorizeView Roles="SystemAdministrator">
+                    <Authorized>
+                        <NavLink href="/admin/account-requests">Account requests</NavLink>
+                    </Authorized>
+                </AuthorizeView>
                 <NavLink href="/posts"
                          Match="NavLinkMatch.All">
                     Posts

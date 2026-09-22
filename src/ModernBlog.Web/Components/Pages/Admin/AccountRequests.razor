@@ -1,0 +1,78 @@
+@page "/admin/account-requests"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using ModernBlog.Web.Data
+@attribute [Authorize(Roles = "SystemAdministrator")]
+@inject UserManager<ApplicationUser> UserManager
+
+<PageTitle>Account requests</PageTitle>
+<h1>Account requests</h1>
+<p>Approve a request to allow the user to sign in. Rejected requests cannot sign in.</p>
+@if (message is not null)
+{
+    <p role="status">@message</p>
+}
+@if (requests.Count == 0)
+{
+    <p>No pending account requests.</p>
+}
+else
+{
+    <table class="table">
+        <thead><tr><th>Email</th><th>Actions</th></tr></thead>
+        <tbody>
+            @foreach (var request in requests)
+            {
+                <tr>
+                    <td>@request.Email</td>
+                    <td>
+                        <form method="post" @formname="@($"review-{request.Id}")" @onsubmit="ReviewAsync">
+                            <AntiforgeryToken />
+                            <input type="hidden" name="UserId" value="@request.Id" />
+                            <button class="btn btn-primary" type="submit" name="Decision" value="approve">Approve</button>
+                            <button class="btn btn-outline-danger" type="submit" name="Decision" value="reject">Reject</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [SupplyParameterFromForm] private string? UserId { get; set; }
+    [SupplyParameterFromForm] private string? Decision { get; set; }
+    private List<ApplicationUser> requests = [];
+    private string? message;
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+        => requests = await UserManager.Users.Where(user => user.ApprovalStatus == AccountApprovalStatus.Pending)
+            .OrderBy(user => user.Email).ToListAsync();
+
+    private async Task ReviewAsync()
+    {
+        if (UserId is null || (Decision != "approve" && Decision != "reject"))
+        {
+            message = "Invalid account request.";
+            return;
+        }
+
+        var user = await UserManager.FindByIdAsync(UserId);
+        if (user is null || user.ApprovalStatus != AccountApprovalStatus.Pending)
+        {
+            message = "This request has already been reviewed or no longer exists.";
+            await LoadAsync();
+            return;
+        }
+
+        user.ApprovalStatus = Decision == "approve" ? AccountApprovalStatus.Approved : AccountApprovalStatus.Rejected;
+        var result = await UserManager.UpdateAsync(user);
+        message = result.Succeeded
+            ? $"Account request {(Decision == "approve" ? "approved" : "rejected")}."
+            : "Unable to update the request. Please reload and try again.";
+        await LoadAsync();
+    }
+}

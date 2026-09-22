@@ -26,7 +26,7 @@
 <div  class="alert alert-info">
     You've successfully authenticated with <strong>@ProviderDisplayName</strong>.
     Please enter an email address for this site below and click the Register button to finish
-    logging in.
+    requesting an account. An administrator must approve your account before you can sign in.
 </div>
 
 <div class="row">
@@ -124,6 +124,11 @@
             RedirectManager.RedirectTo(ReturnUrl);
             return;
         }
+        else if (result.IsNotAllowed)
+        {
+            RedirectManager.RedirectToWithStatus("Account/Login", "Error: Your account has not been approved by the administrator.", HttpContext);
+            return;
+        }
         else if (result.IsLockedOut)
         {
             RedirectManager.RedirectTo("Account/Lockout");
@@ -168,16 +173,7 @@
                     new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code });
                 await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
 
-                // If account confirmation is required, we need to show the link if we don't have a real email sender
-                if (UserManager.Options.SignIn.RequireConfirmedAccount)
-                {
-                    RedirectManager.RedirectTo("Account/RegisterConfirmation", new() { ["email"] = Input.Email });
-                }
-                else
-                {
-                    await SignInManager.SignInAsync(user, isPersistent: false, externalLoginInfo.LoginProvider);
-                    RedirectManager.RedirectTo(ReturnUrl);
-                }
+                RedirectManager.RedirectTo("Account/RegisterConfirmation");
             }
         }
         else
