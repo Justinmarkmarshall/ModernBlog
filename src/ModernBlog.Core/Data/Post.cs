@@ -75,6 +75,7 @@ public sealed class Post
     public void ReturnToDraft()
     {
         Status = PostStatus.Draft;
+        PublishedAtUtc = null;
         UpdatedAtUtc = DateTimeOffset.UtcNow;
     }
 

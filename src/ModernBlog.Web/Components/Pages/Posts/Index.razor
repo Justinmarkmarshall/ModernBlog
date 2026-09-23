@@ -1,5 +1,6 @@
 ﻿@page "/posts"
 @using Microsoft.EntityFrameworkCore
+@using ModernBlog.Core.Posts
 @using ModernBlog.Web.Components.Dtos
 @inject ModernBlog.Core.Persistence.BlogDbContext Db
 @inject ModernBlog.Web.Data.ApplicationDbContext userDb
@@ -82,12 +83,14 @@ else
     protected override async Task OnInitializedAsync()
     {
         var ids = await Db.Posts
+            .Where(p => p.Status == PostStatus.Published)
             .Select(p => new { p.Id, Key = p.PublishedAtUtc ?? p.CreatedAtUtc })
             .ToListAsync();
 
         var orderedIds = ids.OrderByDescending(x => x.Key).Select(x => x.Id).ToList();
 
         var posts = await Db.Posts
+            .Where(p => p.Status == PostStatus.Published)
             .Where(p => orderedIds.Contains(p.Id))
             // optional: .OrderBy(...) to match orderedIds if needed
             .ToListAsync();

@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 @using ModernBlog.Core.Markdown
+@using ModernBlog.Core.Posts
 @using ModernBlog.Core.Persistence
 @using ModernBlog.Web.Components.Dtos
 @inject BlogDbContext Db
@@ -182,6 +183,16 @@ else
         postToUpdate.Title = editModel.Title;
         postToUpdate.Slug = editModel.Slug;
         postToUpdate.Markdown = editModel.Markdown;
+
+        if (isPublish)
+        {
+            postToUpdate.Publish();
+        }
+        else
+        {
+            postToUpdate.ReturnToDraft();
+        }
+
         postToUpdate.UpdatedAtUtc = DateTimeOffset.UtcNow;
 
         await Db.SaveChangesAsync();

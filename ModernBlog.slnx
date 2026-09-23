@@ -6,4 +6,8 @@
     <Project Path="src/ModernBlog.Core/ModernBlog.Core.csproj" />
     <Project Path="src/ModernBlog.Web/ModernBlog.Web.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ModernBlog.IntegrationTests/ModernBlog.IntegrationTests.csproj" />
+    <Project Path="tests/ModernBlog.UnitTests/ModernBlog.UnitTests.csproj" />
+  </Folder>
 </Solution>

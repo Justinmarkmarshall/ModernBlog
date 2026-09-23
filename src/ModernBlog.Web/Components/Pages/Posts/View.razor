@@ -26,7 +26,8 @@
             return;
         }
 
-        var dbPost = await Db.Posts.FirstOrDefaultAsync(p => p.Slug == slug);
+        var dbPost = await Db.Posts
+            .FirstOrDefaultAsync(p => p.Slug == slug && p.Status == PostStatus.Published);
         if (dbPost is null)
         {
             Navigation.NavigateTo("/not-found");
